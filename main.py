@@ -4,16 +4,14 @@ import pygsheets
 import numpy as np
 import requests
 from datetime import datetime
+from cbr_api import api
 
 # запрос курса доллара
 # https://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=23/06/2022&date_req2=23/06/2022&VAL_NM_RQ=R01235
 
 def get_usd_rate(date_req):
-    cbr_server_req = f"https://www.cbr.ru/scripts/XML_dynamic.asp?date_req1={date_req}&date_req2={date_req}&VAL_NM_RQ=R01235"
-    response = requests.get(cbr_server_req).content.decode()
-    pos1 = response.find("<Value>") + 7
-    pos2 = response.find("</Value>")
-    return float(response[pos1:pos2].replace(",", "."))
+    usd = api.Currency("USD")
+    return usd.rate_at_date(date_req)
 
 
 def connect():
@@ -22,11 +20,9 @@ def connect():
     try:
         # read connection parameters
         params = config()
-
         # connect to the PostgreSQL server
         print('Connecting to the PostgreSQL database...')
         conn = psycopg2.connect(**params)
-
         # create a cursor
         cur = conn.cursor()
 
@@ -63,5 +59,5 @@ def read_data():
 if __name__ == '__main__':
     # connect()
     # read_data()
-    print(get_usd_rate(datetime.now().strftime("%d.%m.%Y")))
+    print(get_usd_rate(datetime.now().strftime("%d/%m/%Y")))
 
